@@ -1,26 +1,286 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+body {
+  font-family: "Inter", sans-serif;
+  background: #000000;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* App.js - Start Region */
+
+.app-section {
+  width: 100%;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@media (min-width: 768px) {
+  .app-section {
+    padding-left: 10%;
+    padding-right: 10%;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.app-container {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
 }
+
+.sidebar-left {
+  height: 100vh;
+  width: fit-content;
+  position: fixed;
+}
+
+.sidebar-img-large {
+  max-height: 100vh;
+}
+
+.sidebar-img-small {
+  max-height: 100vh;
+  display: none;
+}
+
+.main-content {
+  width: 60%;
+  border: 0.3px solid rgb(75, 85, 99);
+  margin-left: 285px;
+  margin-right: 300px;
+}
+
+.sidebar-right {
+  height: 100vh;
+  padding: 1.5rem;
+  width: 300px;
+  position: fixed;
+  right: 10%;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.5rem;
+  border-radius: 2rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  margin-bottom: 1.5rem;
+  color: rgb(55, 65, 81);
+  border: 1px solid rgb(55, 65, 81);
+  background-color: transparent;
+  font-size: 0.875rem;
+}
+
+.search-input::placeholder {
+  color: rgb(107, 114, 128);
+}
+
+.user-info {
+  border: 1px solid rgb(55, 65, 81);
+  font-size: 0.875rem;
+  padding: 1rem;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-radius: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.username {
+  color: white;
+}
+
+.follow-img {
+  width: 100%;
+  margin-top: 1.5rem;
+}
+
+/* Media Queries */
+@media (max-width: 1280px) {
+  .main-content {
+    width: 100%;
+    margin-right: 0;
+  }
+
+  .sidebar-right {
+    display: none;
+  }
+}
+
+@media (max-width: 1024px) {
+  .sidebar-img-large {
+    display: none;
+  }
+
+  .sidebar-img-small {
+    display: block;
+  }
+
+  .main-content {
+    margin-left: 90px;
+  }
+}
+
+/* App.js - End Region */
+
+/* PostItem.js - Start Region */
+
+.post-item {
+  padding: 1rem;
+  border-bottom: 1px solid rgb(75, 85, 99);
+  color: rgb(209, 213, 219);
+}
+
+.post-header {
+  display: flex;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .post-header {
+    gap: 0.5rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .post-header {
+    justify-content: space-between;
+  }
+}
+
+.post-time {
+  color: rgb(243, 244, 246);
+  font-size: 0.875rem;
+}
+
+.post-content {
+  margin-top: 0.25rem;
+}
+
+.truncated {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.post-edit-textarea {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid;
+  border-radius: 0.25rem;
+  margin-top: 0.5rem;
+}
+
+.post-edit-textarea:focus {
+  outline: 1px solid rgb(75, 85, 99);
+}
+
+.show-more-button {
+  color: rgb(59, 130, 246);
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  cursor: pointer;
+}
+
+.post-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+/* PostItem.js - End Region */
+
+/* PostForm.js - Start Region */
+.post-form-section {
+  color: rgb(209, 213, 219);
+  border-bottom: 1px solid rgb(75, 85, 99);
+}
+
+.post-form-header {
+  width: 100%;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  text-align: center;
+  font-weight: 600;
+  border-bottom: 1px solid rgb(75, 85, 99);
+}
+
+.post-form {
+  padding: 1rem;
+}
+
+.post-textarea {
+  border: none;
+  outline: none;
+  width: 100%;
+  min-height: 75px;
+  resize: none;
+  background-color: transparent;
+  color: inherit;
+}
+
+.post-textarea:focus {
+  outline: none;
+}
+
+.post-divider {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  border-color: rgb(75, 85, 99);
+}
+
+/* PostForm.js - End Region */
+
+/* AuthForm.js - Start Region */
+
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+  height: 100vh;
+}
+
+@media (max-width: 768px) {
+  .auth-container {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 50%;
+  background-color: white;
+  padding: 1rem;
+  align-items: center;
+  border-radius: 0.5rem;
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+}
+
+@media (max-width: 1024px) {
+  .auth-form {
+    width: 100%;
+  }
+}
+
+.auth-logo {
+  max-width: 50px;
+}
+
+.auth-heading {
+  text-align: left;
+  width: 100%;
+  margin-top: 1.5rem;
+}
+
+.auth-input {
+  width: 100%;
+  border: 1px solid;
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+}
+
+/* AuthForm.js - End Region */
