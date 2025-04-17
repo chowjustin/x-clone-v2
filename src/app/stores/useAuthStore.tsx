@@ -1,48 +1,56 @@
-import { createSelectorHooks } from "auto-zustand-selectors-hook";
-import { produce } from "immer";
-import { create } from "zustand";
+import {createSelectorHooks} from "auto-zustand-selectors-hook";
+import {produce} from "immer";
+import {create} from "zustand";
 
-import { removeToken, setToken } from "@/lib/cookies";
-import { User, WithToken } from "@/types/user";
+import {removeToken, setToken} from "@/lib/cookies";
+import {User, WithToken} from "@/types/user";
 
 type AuthStoreType = {
-  user: User | null;
-  isAuthed: boolean;
-  isLoading: boolean;
-  login: (user: User & WithToken) => void;
-  logout: () => void;
-  stopLoading: () => void;
+    user: User | null;
+    isAuthed: boolean;
+    isLoading: boolean;
+    login: (user: User & WithToken) => void;
+    logout: () => void;
+    stopLoading: () => void;
+    setUser: (user: User) => void;
 };
 
 const useAuthStoreBase = create<AuthStoreType>((set) => ({
-  user: null,
-  isAuthed: false,
-  isLoading: true,
-  login: (user) => {
-    setToken(user.token);
-    set(
-      produce<AuthStoreType>((state) => {
-        state.isAuthed = true;
-        state.user = user;
-      }),
-    );
-  },
-  logout: () => {
-    removeToken();
-    set(
-      produce<AuthStoreType>((state) => {
-        state.isAuthed = false;
-        state.user = null;
-      }),
-    );
-  },
-  stopLoading: () => {
-    set(
-      produce<AuthStoreType>((state) => {
-        state.isLoading = false;
-      }),
-    );
-  },
+    user: null,
+    isAuthed: false,
+    isLoading: true,
+    login: (user) => {
+        setToken(user.token);
+        set(
+            produce<AuthStoreType>((state) => {
+                state.isAuthed = true;
+                state.user = user;
+            }),
+        );
+    },
+    logout: () => {
+        removeToken();
+        set(
+            produce<AuthStoreType>((state) => {
+                state.isAuthed = false;
+                state.user = null;
+            }),
+        );
+    },
+    stopLoading: () => {
+        set(
+            produce<AuthStoreType>((state) => {
+                state.isLoading = false;
+            }),
+        );
+    },
+    setUser: (user) => {
+        set(
+            produce<AuthStoreType>((state) => {
+                state.user = user;
+            }),
+        );
+    },
 }));
 
 const useAuthStore = createSelectorHooks(useAuthStoreBase);

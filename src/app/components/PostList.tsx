@@ -1,44 +1,32 @@
-import { FC } from "react";
+import {FC} from "react";
 import PostItem from "./PostItem";
-
-interface Post {
-    id: number;
-    content: string;
-    likes: number;
-    likedBy: string[];
-    author: string;
-    createdAt: string;
-}
+import {Post} from "@/types/post";
 
 interface PostListProps {
     posts: Post[];
-    deletePost: (id: number) => void;
-    toggleLike: (id: number) => void;
-    editPost: (id: number, newContent: string) => void;
-    user: string | null;
+    refetchPosts: () => void;
+    currentUser: string | null;
 }
 
 const PostList: FC<PostListProps> = ({
                                          posts,
-                                         deletePost,
-                                         toggleLike,
-                                         editPost,
-                                         user
+                                         refetchPosts,
+                                         currentUser
                                      }) => {
     return (
         <div>
-            {posts.length === 0 ? (
-                <p>No posts yet!</p>
+            {posts?.length === 0 ? (
+                <p className="text-center p-4">No posts yet!</p>
             ) : (
-                posts.map((post) => (
-                    <PostItem
-                        key={post.id}
-                        post={post}
-                        deletePost={deletePost}
-                        toggleLike={toggleLike}
-                        editPost={editPost}
-                        user={user}
-                    />
+                posts?.map((post) => (
+                    !post.is_deleted && (
+                        <PostItem
+                            key={post.id}
+                            post={post}
+                            refetchPosts={refetchPosts}
+                            currentUser={currentUser}
+                        />
+                    )
                 ))
             )}
         </div>

@@ -14,7 +14,7 @@ import Image from "next/image";
 import Link from "next/link";
 import withAuth from "@/components/hoc/withAuth";
 
-export default withAuth(RegisterUser, true)
+export default withAuth(RegisterUser, false)
 
 function RegisterUser() {
     const methods = useForm<RegisterRequest>({

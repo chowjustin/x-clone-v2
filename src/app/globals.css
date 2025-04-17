@@ -6,53 +6,6 @@ body {
 
 /* App.js - Start Region */
 
-.app-section {
-    width: 100%;
-}
-
-@media (min-width: 768px) {
-    .app-section {
-        padding-left: 10%;
-        padding-right: 10%;
-    }
-}
-
-.app-container {
-    display: flex;
-    width: 100%;
-    min-height: 100vh;
-}
-
-.sidebar-left {
-    height: 100vh;
-    width: fit-content;
-    position: fixed;
-}
-
-.sidebar-img-large {
-    max-height: 100vh;
-}
-
-.sidebar-img-small {
-    max-height: 100vh;
-    display: none;
-}
-
-.main-content {
-    width: 60%;
-    border: 0.3px solid rgb(75, 85, 99);
-    margin-left: 285px;
-    margin-right: 300px;
-}
-
-.sidebar-right {
-    height: 100vh;
-    padding: 1.5rem;
-    width: 300px;
-    position: fixed;
-    right: 10%;
-}
-
 .search-input {
     width: 100%;
     padding: 0.5rem;
@@ -70,56 +23,19 @@ body {
     color: rgb(107, 114, 128);
 }
 
-.user-info {
-    border: 1px solid rgb(55, 65, 81);
-    font-size: 0.875rem;
-    padding: 1rem;
-    padding-top: 0.75rem;
-    padding-bottom: 0.75rem;
-    border-radius: 0.5rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.username {
-    color: white;
-}
-
 .follow-img {
     width: 100%;
     margin-top: 1.5rem;
 }
 
-/* Media Queries */
-@media (max-width: 1280px) {
-    .main-content {
-        width: 100%;
-        margin-right: 0;
-    }
-
-    .sidebar-right {
-        display: none;
-    }
-}
-
-@media (max-width: 1024px) {
-    .sidebar-img-large {
-        display: none;
-    }
-
-    .sidebar-img-small {
-        display: block;
-    }
-
-    .main-content {
-        margin-left: 90px;
-    }
-}
-
 /* App.js - End Region */
 
 /* PostItem.js - Start Region */
+
+.border-right-03 {
+    border-right: 1px solid rgb(75, 85, 99);
+    color: rgb(209, 213, 219);
+}
 
 .post-item {
     padding: 1rem;
