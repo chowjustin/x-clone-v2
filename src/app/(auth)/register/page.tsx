@@ -4,25 +4,50 @@ import React from "react";
 import {FormProvider, useForm} from "react-hook-form";
 import Input from "@/components/form/Input";
 import Button from "@/components/button/Button";
+import {RegisterRequest} from "@/types/auth/register";
+import {useMutation} from "@tanstack/react-query";
+import {AxiosError, AxiosResponse} from "axios";
+import api from "@/lib/api";
+import toast from "react-hot-toast";
+import {useRouter} from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import {LoginRequest} from "@/types/auth/login";
-import useLoginMutation from "@/app/(auth)/login/hooks/useLoginMutation";
 import withAuth from "@/components/hoc/withAuth";
 
-export default withAuth(LoginUser, false)
+export default withAuth(RegisterUser, true)
 
-function LoginUser() {
-    const methods = useForm<LoginRequest>({
+function RegisterUser() {
+    const methods = useForm<RegisterRequest>({
         mode: "onChange",
     });
 
-    const {handleSubmit} = methods;
+    const router = useRouter();
+    const {handleSubmit, reset} = methods;
 
-    const {mutate: mutateLogin, isPending} = useLoginMutation();
+    const {mutate, isPending} = useMutation<
+        AxiosResponse,
+        AxiosError,
+        RegisterRequest
+    >({
+        mutationFn: async (data: RegisterRequest) => {
+            const res = await api.post("/user/register", data);
+            return res;
+        },
+        onSuccess: () => {
+            toast.success("Account successfully created!");
+            reset();
+            router.push("/login")
+        },
+        onError: (error) => {
+            const errorMessage =
+                (error.response?.data as { error?: string })?.error || error.message;
+            toast.error(errorMessage);
+        },
 
-    const onSubmit = (data: LoginRequest) => {
-        mutateLogin(data);
+    });
+
+    const onSubmit = (data: RegisterRequest) => {
+        mutate(data)
     };
 
     return (
@@ -32,7 +57,16 @@ function LoginUser() {
                       className="space-y-4 w-1/2 p-12 rounded-lg shadow-md max-lg:w-3/4 max-md:w-full">
                     <Image src="/images/xlogo.png" alt="logo" width={300} height={300}
                            className="max-w-[30px] mx-auto"/>
-                    <h2 className="text-2xl font-bold">Sign in to X</h2>
+                    <h2 className="text-2xl font-bold">Sign up to X</h2>
+                    <Input
+                        id="name"
+                        label="Name"
+                        type="text"
+                        placeholder="Enter your name"
+                        validation={{
+                            required: "Name is required",
+                        }}
+                    />
                     <Input
                         id="username"
                         label="Username"
@@ -58,12 +92,12 @@ function LoginUser() {
                     <Button variant="primary" type="submit" className="w-full mt-4"
                             isLoading={isPending}
                     >
-                        Sign In
+                        Sign Up
                     </Button>
                     <p className="text-sm text-center text-gray-500">
-                        {"Don't have an account?"}{" "}
-                        <Link href="/register" className="text-blue-500 hover:underline">
-                            Register
+                        Already have an account?{" "}
+                        <Link href="/login" className="text-blue-500 hover:underline">
+                            Login
                         </Link>
                     </p>
                 </form>

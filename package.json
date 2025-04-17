@@ -1,5 +1,5 @@
 {
-  "name": "x-clone-v2",
+  "name": "x",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,16 +9,21 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@tanstack/react-query": "5.74.3",
+    "auto-zustand-selectors-hook": "3.0.1",
     "axios": "1.8.4",
     "clsx": "2.1.1",
+    "immer": "10.1.1",
     "lucide-react": "0.488.0",
     "next": "15.3.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "7.55.0",
+    "react-hot-toast": "2.5.2",
     "sonner": "2.0.3",
     "tailwind-merge": "3.2.0",
-    "universal-cookie": "8.0.1"
+    "universal-cookie": "8.0.1",
+    "zustand": "5.0.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
