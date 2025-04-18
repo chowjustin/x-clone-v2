@@ -30,8 +30,8 @@ function LoginUser() {
             <FormProvider {...methods}>
                 <form onSubmit={handleSubmit(onSubmit)}
                       className="space-y-4 w-1/2 p-12 rounded-lg shadow-md max-lg:w-3/4 max-md:w-full">
-                    <Image src="/images/xlogo.png" alt="logo" width={300} height={300}
-                           className="max-w-[30px] mx-auto"/>
+                    <Image src="/images/logoireng.png" alt="logo" width={300} height={300}
+                           className="max-w-[40px] mx-auto"/>
                     <h2 className="text-2xl font-bold">Sign in to X</h2>
                     <Input
                         id="username"

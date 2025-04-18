@@ -10,6 +10,10 @@ export const baseURL =
         ? process.env.NEXT_PUBLIC_API_URL_PROD
         : process.env.NEXT_PUBLIC_API_URL_DEV;
 
+export const assetBaseURL = baseURL?.endsWith('/api')
+    ? baseURL.slice(0, -4)
+    : baseURL;
+
 const api = axios.create({
     baseURL: baseURL,
     headers: {

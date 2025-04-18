@@ -2,7 +2,7 @@
 
 import React, {useEffect, useRef, useState} from "react";
 import {useMutation} from "@tanstack/react-query";
-import api, {baseURL} from "@/lib/api";
+import api, {assetBaseURL} from "@/lib/api";
 import Button from "@/components/button/Button";
 import withAuth from "@/components/hoc/withAuth";
 import Image from "next/image";
@@ -15,7 +15,7 @@ import {useRouter} from "next/navigation";
 export default withAuth(ProfilePage, true);
 
 function ProfilePage() {
-    const {user: storeUser, setUser: setStoreUser} = useAuthStore();
+    const {user: storeUser, setUser: setStoreUser, logout: logoutStore} = useAuthStore();
     const [name, setName] = useState<string>("");
     const [bio, setBio] = useState<string>("");
     const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -24,27 +24,20 @@ function ProfilePage() {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const router = useRouter();
 
-    const assetBaseURL = baseURL?.endsWith('/api')
-        ? baseURL.slice(0, -4) // Remove '/api' from the end
-        : baseURL;
-
     useEffect(() => {
         if (storeUser) {
             setName(storeUser.name || "");
             setBio(storeUser.bio || "");
             if (storeUser.image_url) {
-                // Check if the image_url already contains the base URL
                 if (storeUser.image_url.startsWith('http')) {
                     setImagePreview(storeUser.image_url);
                 } else {
-                    // Append the base URL to the image path
                     setImagePreview(`${assetBaseURL}/assets/${storeUser.image_url}`);
                 }
             }
         }
     }, [storeUser]);
 
-    // Update user profile mutation
     const {mutate: updateProfile, isPending: isUpdating} = useMutation({
         mutationFn: async (data: FormData) => {
             const response = await api.patch("/user/update", data, {
@@ -56,7 +49,7 @@ function ProfilePage() {
         },
         onSuccess: (data) => {
             toast.success("Profile updated successfully");
-            // Update auth store with new user data
+
             if (storeUser) {
                 setStoreUser({
                     ...storeUser,
@@ -73,17 +66,20 @@ function ProfilePage() {
         },
     });
 
+    const logout = (): void => {
+        logoutStore();
+        router.push('/login');
+    };
+
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        // Check file size (max 2MB)
         if (file.size > 2 * 1024 * 1024) {
             toast.error("Image size should be less than 2MB");
             return;
         }
 
-        // Check file type
         if (!file.type.startsWith("image/")) {
             toast.error("Please select an image file");
             return;
@@ -91,7 +87,6 @@ function ProfilePage() {
 
         setImageFile(file);
 
-        // Create preview
         const reader = new FileReader();
         reader.onloadend = () => {
             setImagePreview(reader.result as string);
@@ -131,7 +126,6 @@ function ProfilePage() {
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
-                    {/* Profile Image Section */}
                     <div className="flex flex-col items-center">
                         <div className="relative group cursor-pointer" onClick={triggerFileInput}>
                             {imagePreview ? (
@@ -147,9 +141,9 @@ function ProfilePage() {
                                 </div>
                             ) : (
                                 <div className="w-32 h-32 rounded-full bg-gray-700 flex items-center justify-center">
-                  <span className="text-2xl font-bold">
-                    {storeUser?.name ? storeUser.name.charAt(0).toUpperCase() : "U"}
-                  </span>
+                                      <span className="text-2xl font-bold">
+                                        {storeUser?.name ? storeUser.name.charAt(0).toUpperCase() : "U"}
+                                      </span>
                                 </div>
                             )}
 
@@ -170,13 +164,12 @@ function ProfilePage() {
                         <button
                             type="button"
                             onClick={triggerFileInput}
-                            className="mt-2 text-blue-400 text-sm"
+                            className="mt-2 text-blue-400 text-sm cursor-pointer hover:underline"
                         >
                             Change profile photo
                         </button>
                     </div>
 
-                    {/* Profile Form Fields */}
                     <div className="space-y-4">
                         <div>
                             <label htmlFor="name" className="block text-sm font-medium mb-1">
@@ -221,7 +214,6 @@ function ProfilePage() {
                         </div>
                     </div>
 
-                    {/* Submit Button */}
                     <Button
                         type="submit"
                         variant="primary"
@@ -231,12 +223,21 @@ function ProfilePage() {
                     >
                         {isUpdating ? (
                             <span className="flex items-center justify-center">
-                <Loader2 className="w-4 h-4 mr-2 animate-spin"/>
-                Saving...
-              </span>
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin"/>
+                                Saving...
+                            </span>
                         ) : (
                             "Save Profile"
                         )}
+                    </Button>
+                    <Button
+                        type="button"
+                        variant="danger"
+                        size="md"
+                        className="w-full py-2 -mt-2"
+                        onClick={logout}
+                    >
+                        Log Out
                     </Button>
                 </form>
             </div>

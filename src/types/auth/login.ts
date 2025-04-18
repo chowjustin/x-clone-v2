@@ -10,5 +10,5 @@ export type LoginResponse = {
 };
 
 export type LoginError = {
-    message: string;
+    error: string;
 };

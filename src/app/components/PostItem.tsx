@@ -1,41 +1,28 @@
 import {FC, useEffect, useRef, useState} from "react";
 import {Post} from "@/types/post";
 import {useMutation} from "@tanstack/react-query";
-import api from "@/lib/api";
+import api, {assetBaseURL} from "@/lib/api";
 import {toast} from "react-hot-toast";
 import Button from "@/components/button/Button";
 import PostForm from "@/app/components/PostForm";
 import PostList from "@/app/components/PostList";
+import {useRouter} from "next/navigation";
+import {ChevronDown, ChevronUp, Edit, Heart, Loader2, MessageSquare, Trash2} from "lucide-react";
+import Link from "next/link";
+import Image from "next/image";
 
 interface PostItemProps {
     post: Post;
     refetchPosts: () => void;
     currentUser: string | null;
+    isDetailView?: boolean;
 }
-
-const timeAgo = (timestamp: string): string => {
-    const postTime = new Date(timestamp);
-    const currentTime = new Date();
-    const diffInMs = currentTime.getTime() - postTime.getTime();
-    const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
-
-    if (diffInMinutes < 1) {
-        return "Just now";
-    } else if (diffInMinutes < 60) {
-        return `${diffInMinutes} minute${diffInMinutes === 1 ? "" : "s"} ago`;
-    } else if (diffInMinutes < 1440) {
-        const diffInHours = Math.floor(diffInMinutes / 60);
-        return `${diffInHours} hour${diffInHours === 1 ? "" : "s"} ago`;
-    } else {
-        const diffInDays = Math.floor(diffInMinutes / 1440);
-        return `${diffInDays} day${diffInDays === 1 ? "" : "s"} ago`;
-    }
-};
 
 const PostItem: FC<PostItemProps> = ({
                                          post,
                                          refetchPosts,
-                                         currentUser
+                                         currentUser,
+                                         isDetailView = false
                                      }) => {
     const [isEditing, setIsEditing] = useState<boolean>(false);
     const [newContent, setNewContent] = useState<string>(post.text);
@@ -47,26 +34,8 @@ const PostItem: FC<PostItemProps> = ({
     const [isTruncatable, setIsTruncatable] = useState<boolean>(false);
     const contentRef = useRef<HTMLParagraphElement>(null);
 
+    const router = useRouter();
     const isAuthor = currentUser === post.user.username;
-
-    // // Check if post is liked by current user (will need to be updated once API provides this info)
-    // useEffect(() => {
-    //     // This is a placeholder for actual implementation
-    //     // You'll need to update this when the API provides information about whether a post is liked by the current user
-    //     const checkIfLiked = async () => {
-    //         try {
-    //             const response = await api.get(`/likes/check/${post.id}`);
-    //             setIsLiked(response.data.isLiked);
-    //         } catch (error) {
-    //             // Silently fail - not critical functionality
-    //             setIsLiked(false);
-    //         }
-    //     };
-    //
-    //     if (currentUser) {
-    //         checkIfLiked();
-    //     }
-    // }, [post.id, currentUser]);
 
     useEffect(() => {
         if (contentRef.current) {
@@ -78,7 +47,6 @@ const PostItem: FC<PostItemProps> = ({
         }
     }, [post.text]);
 
-    // Delete post mutation
     const {mutate: deletePost, isPending: isDeleting} = useMutation({
         mutationFn: async () => {
             return await api.delete(`/post/${post.id}`);
@@ -93,7 +61,6 @@ const PostItem: FC<PostItemProps> = ({
         }
     });
 
-    // Update post mutation
     const {mutate: updatePost, isPending: isUpdating} = useMutation({
         mutationFn: async (text: string) => {
             return await api.put(`/post/${post.id}`, {text});
@@ -109,7 +76,6 @@ const PostItem: FC<PostItemProps> = ({
         }
     });
 
-    // Like post mutation
     const {mutate: likePost, isPending: isLikingPost} = useMutation({
         mutationFn: async () => {
             return await api.put(`/likes/${post.id}`);
@@ -118,12 +84,11 @@ const PostItem: FC<PostItemProps> = ({
             setIsLiked(true);
             refetchPosts();
         },
-        onError: (error: any) => {
+        onError: () => {
             unlikePost()
         }
     });
 
-    // Unlike post mutation
     const {mutate: unlikePost, isPending: isUnlikingPost} = useMutation({
         mutationFn: async () => {
             return await api.delete(`/likes/${post.id}`);
@@ -132,7 +97,7 @@ const PostItem: FC<PostItemProps> = ({
             setIsLiked(false);
             refetchPosts();
         },
-        onError: (error: any) => {
+        onError: () => {
             likePost()
         }
     });
@@ -140,11 +105,6 @@ const PostItem: FC<PostItemProps> = ({
     const isLiking = isLikingPost || isUnlikingPost;
 
     const handleLike = () => {
-        if (!currentUser) {
-            toast.error("You must be logged in to like posts");
-            return;
-        }
-
         if (isLiked) {
             unlikePost();
         } else {
@@ -166,96 +126,200 @@ const PostItem: FC<PostItemProps> = ({
         }
     };
 
-    return (
-        <div className="post-item">
-            <p className="post-header">
-                <strong>@{post.user.username}</strong>{" "}
-                {/*<span className="post-time">{post.createdAt ? timeAgo(post.createdAt) : "Recently"}</span>*/}
-            </p>
+    const navigateToPostDetail = () => {
+        if (!isDetailView) {
+            router.push(`/post/${post.id}`);
+        }
+    };
 
-            {isEditing ? (
-                <textarea
-                    value={newContent}
-                    onChange={(e) => setNewContent(e.target.value)}
-                    className="post-edit-textarea"
-                    disabled={isUpdating}
-                />
-            ) : (
-                <div>
-                    <p
-                        ref={contentRef}
-                        className={`post-content ${
-                            !isExpanded && isTruncatable ? "truncated" : ""
-                        }`}
-                    >
-                        {post.text}
-                    </p>
-                    {isTruncatable && (
-                        <button
-                            onClick={() => setIsExpanded(!isExpanded)}
-                            className="show-more-button"
-                        >
-                            {isExpanded ? "Show less" : "Show more"}
-                        </button>
+    const navigateToUserProfile = (e: React.MouseEvent) => {
+        e.stopPropagation(); // Prevent triggering the post detail navigation
+        router.push(`/profile/${post.user.username}`);
+    };
+
+    return (
+        <div className="post-item border-b border-gray-800 py-4">
+            <div className="flex items-start">
+                <div className="mr-3 cursor-pointer" onClick={navigateToUserProfile}>
+                    {post.user.image_url ? (
+                        <div className="w-10 h-10 rounded-full overflow-hidden">
+                            <Image
+                                src={post.user.image_url.startsWith('http')
+                                    ? post.user.image_url
+                                    : `${assetBaseURL}/assets/${post.user.image_url}`}
+                                alt={post.user.username}
+                                width={40}
+                                height={40}
+                                className="object-cover w-full h-full"
+                            />
+                        </div>
+                    ) : (
+                        <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center">
+                          <span className="text-lg font-bold">
+                            {post.user.name ? post.user.name.charAt(0).toUpperCase() : post.user.username.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
                     )}
                 </div>
-            )}
 
-            <div className="post-actions">
-                {isEditing ? (
-                    <>
-                        <Button onClick={handleSave} variant="primary" size="sm" disabled={isUpdating}>
-                            {isUpdating ? "Saving..." : "Save"}
-                        </Button>
-                        <Button onClick={() => setIsEditing(false)} variant="secondary" size="sm" disabled={isUpdating}>
-                            Cancel
-                        </Button>
-                    </>
-                ) : (
-                    <>
-                        <button onClick={handleLike} disabled={isLiking}>
-                            {isLiked ? "❤️" : "🤍"} {post.total_likes || 0}
-                        </button>
+                <div className="flex-1">
+                    <div className="flex items-center">
+                        <p className="font-bold cursor-pointer hover:underline" onClick={navigateToUserProfile}>
+                            {post.user.name || post.user.username}
+                        </p>
+                        <p className="text-gray-500 ml-2 cursor-pointer hover:underline"
+                           onClick={navigateToUserProfile}>
+                            @{post.user.username}
+                        </p>
+                        <span className="text-gray-500 mx-1">·</span>
+                    </div>
 
-                        <button onClick={() => setShowReplyForm(!showReplyForm)}>
-                            💬 Reply
-                        </button>
+                    {post.parent_id && !isDetailView && (
+                        <p className="text-gray-500 text-sm mb-2">
+                            Replying to <Link href={`/post/${post.parent_id}`} className="text-blue-400">this
+                            tweet</Link>
+                        </p>
+                    )}
 
-                        {post.replies && post.replies.length > 0 && (
-                            <button onClick={() => setShowReplies(!showReplies)}>
-                                {showReplies ? "Hide replies" : `Show replies (${post.replies.length})`}
-                            </button>
+                    <div onClick={navigateToPostDetail} className={isDetailView ? "" : "cursor-pointer"}>
+                        {isEditing ? (
+                            <textarea
+                                value={newContent}
+                                onChange={(e) => setNewContent(e.target.value)}
+                                className="w-full bg-transparent border border-gray-700 rounded-md p-2 mt-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                rows={4}
+                                disabled={isUpdating}
+                                onClick={(e) => e.stopPropagation()}
+                            />
+                        ) : (
+                            <div>
+                                <p
+                                    ref={contentRef}
+                                    className={`mt-1 ${!isExpanded && isTruncatable && !isDetailView ? "line-clamp-3" : ""}`}
+                                >
+                                    {post.text}
+                                </p>
+                                {isTruncatable && !isDetailView && (
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setIsExpanded(!isExpanded);
+                                        }}
+                                        className="text-blue-400 text-sm hover:underline"
+                                    >
+                                        {isExpanded ? "Show less" : "Show more"}
+                                    </button>
+                                )}
+                            </div>
                         )}
+                    </div>
+
+                    {/* Buttons */}
+                    <div className="flex items-center mt-3 space-x-6" onClick={(e) => e.stopPropagation()}>
+                        {isDetailView ? (
+                            <button
+                                onClick={() => setShowReplyForm(!showReplyForm)}
+                                className="flex items-center text-gray-400 hover:text-blue-400"
+                            >
+                                <MessageSquare className="w-4 h-4 mr-1"/>
+                                {/*<span>{post.total_replies || 0}</span>*/}
+                            </button>
+                        ) : (
+                            <Link
+                                href={`/post/${post.id}`}
+                                className="flex items-center text-gray-400 hover:text-blue-400"
+                            >
+                                <MessageSquare className="w-4 h-4 mr-1"/>
+                                {/*<span>{post.total_replies || 0}</span>*/}
+                            </Link>
+                        )}
+
+                        <button
+                            onClick={handleLike}
+                            disabled={isLiking}
+                            className={`flex items-center ${isLiked ? "text-red-500" : "text-gray-400 hover:text-red-500"}`}
+                        >
+                            <Heart className={`w-4 h-4 mr-1 ${isLiked ? "fill-current" : ""}`}/>
+                            <span>{post.total_likes || 0}</span>
+                        </button>
 
                         {isAuthor && (
                             <>
-                                <button onClick={() => setIsEditing(true)} disabled={isDeleting}>
-                                    ✏️ Edit
-                                </button>
-                                <button onClick={handleDelete} disabled={isDeleting}>
-                                    {isDeleting ? "Deleting..." : "🗑️ Delete"}
-                                </button>
+                                {isEditing ? (
+                                    <div className="flex space-x-2">
+                                        <Button onClick={handleSave} variant="primary" size="sm" disabled={isUpdating}>
+                                            {isUpdating ? "Saving..." : "Save"}
+                                        </Button>
+                                        <Button onClick={() => setIsEditing(false)} variant="secondary" size="sm"
+                                                disabled={isUpdating}>
+                                            Cancel
+                                        </Button>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <button
+                                            onClick={() => setIsEditing(true)}
+                                            disabled={isDeleting}
+                                            className="flex items-center text-gray-400 hover:text-blue-400"
+                                        >
+                                            <Edit className="w-4 h-4"/>
+                                        </button>
+                                        <button
+                                            onClick={handleDelete}
+                                            disabled={isDeleting}
+                                            className="flex items-center text-gray-400 hover:text-red-500"
+                                        >
+                                            {isDeleting ? (
+                                                <Loader2 className="w-4 h-4 animate-spin"/>
+                                            ) : (
+                                                <Trash2 className="w-4 h-4"/>
+                                            )}
+                                        </button>
+                                    </>
+                                )}
                             </>
                         )}
-                    </>
-                )}
+                    </div>
+
+                    {isDetailView && showReplyForm && (
+                        <div className="mt-4">
+                            <PostForm refetchPosts={refetchPosts} parentId={post.id}/>
+                        </div>
+                    )}
+                    
+                    {!isDetailView && post.replies && post.replies.length > 0 && (
+                        <div className="mt-3">
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setShowReplies(!showReplies);
+                                }}
+                                className="flex items-center text-blue-400 text-sm hover:underline"
+                            >
+                                {showReplies ? (
+                                    <>
+                                        <ChevronUp className="w-4 h-4 mr-1"/> Hide replies
+                                    </>
+                                ) : (
+                                    <>
+                                        <ChevronDown className="w-4 h-4 mr-1"/> Show {post.replies.length} replies
+                                    </>
+                                )}
+                            </button>
+
+                            {showReplies && (
+                                <div className="mt-3 pl-4 border-l border-gray-800">
+                                    <PostList
+                                        posts={post.replies}
+                                        refetchPosts={refetchPosts}
+                                        currentUser={currentUser}
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
             </div>
-
-            {showReplyForm && (
-                <div className="reply-form-container">
-                    <PostForm refetchPosts={refetchPosts} parentId={post.id}/>
-                </div>
-            )}
-
-            {showReplies && post.replies && post.replies.length > 0 && (
-                <div className="replies-container">
-                    <PostList
-                        posts={post.replies}
-                        refetchPosts={refetchPosts}
-                        currentUser={currentUser}
-                    />
-                </div>
-            )}
         </div>
     );
 };

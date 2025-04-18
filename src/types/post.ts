@@ -27,3 +27,15 @@ export interface PostsQueryParams {
     page?: number;
     per_page?: number;
 }
+
+export interface PostsResponse {
+    status: boolean;
+    message: string;
+    data: any[];
+    meta: {
+        page: number;
+        per_page: number;
+        max_page: number;
+        count: number;
+    };
+}

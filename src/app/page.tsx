@@ -1,6 +1,6 @@
 "use client";
 
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import PostForm from "@/app/components/PostForm";
 import PostList from "@/app/components/PostList";
 import Button from "@/components/button/Button";
@@ -22,9 +22,8 @@ import {
 import Link from "next/link";
 import useAuthStore from "@/app/stores/useAuthStore";
 import {useQuery} from '@tanstack/react-query';
-import api from "@/lib/api";
+import api, {assetBaseURL} from "@/lib/api";
 import {PostsQueryParams} from "@/types/post";
-import {useRouter} from "next/navigation";
 
 export default withAuth(Home, true)
 
@@ -33,11 +32,23 @@ function Home() {
         page: 1,
         per_page: 10
     });
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
 
-    const router = useRouter();
-    const {user: userStored, logout: logoutStore} = useAuthStore();
+    const {user} = useAuthStore();
 
-    // Fetch posts using Tanstack Query
+    useEffect(() => {
+        if (user) {
+            if (user.image_url) {
+                if (user.image_url.startsWith('http')) {
+                    setImagePreview(user.image_url);
+                } else {
+                    setImagePreview(`${assetBaseURL}/assets/${user.image_url}`);
+                }
+            }
+        }
+    }, [user]);
+
+    // Get Post
     const {
         data: postsResponse,
         isLoading,
@@ -61,11 +72,6 @@ function Home() {
                 page: queryParams.page! + 1
             });
         }
-    };
-
-    const logout = (): void => {
-        logoutStore();
-        router.push('/login');
     };
 
     return (
@@ -95,25 +101,38 @@ function Home() {
                     <Link
                         href="/profile"
                         className="w-full h-fit p-3 px-5 items-center rounded-full hover:bg-gray-900 cursor-pointer w-fit transition-colors flex">
-                        <Image
-                            src="/images/xlogo.png"
-                            alt="logo"
-                            width={300}
-                            height={300}
-                            className="max-w-[40px] h-fit w-fit rounded-full overflow-hidden p-1"
-                        />
+                        {imagePreview ? (
+                            <div className="w-10 h-10 rounded-full overflow-hidden">
+                                <Image
+                                    src={imagePreview}
+                                    alt="Profile"
+                                    width={300}
+                                    height={300}
+                                    className="max-w-[40px] object-cover w-full h-full"
+                                    priority
+                                />
+                            </div>
+                        ) : (
+                            <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center">
+                                  <span className="text-lg font-bold">
+                                    {user?.name ? user?.name.charAt(0).toUpperCase() : "U"}
+                                  </span>
+                            </div>
+                        )}
                         <div className="ml-2 h-full mb-[0.5px] max-md:hidden">
                             <p className="font-bold text-white">
-                                {userStored?.name}
+                                {user?.name}
                             </p>
-                            <p className="text-gray-400 text-sm">@{userStored?.username}</p>
+                            <p className="text-gray-400 text-sm">@{user?.username}</p>
                         </div>
                     </Link>
                 </div>
             </div>
             <div
-                className="w-1/2 max-lg:right-0 max-lg:w-[70%] max-md:w-[calc(100%-75px)] max-xl:w-[60%] xl:mx-auto max-xl:right-[10%] max-xl:absolute bg-black">
-                <PostForm refetchPosts={refetch}/>
+                className="w-1/2 max-lg:right-0 max-lg:w-[70%] min-h-screen max-md:w-[calc(100%-75px)] max-xl:w-[60%] xl:mx-auto max-xl:right-[10%] max-xl:absolute bg-black">
+                <div>
+                    <PostForm refetchPosts={refetch}/>
+                </div>
 
                 {isLoading ? (
                     <div className="text-center p-4">Loading posts...</div>
@@ -124,7 +143,7 @@ function Home() {
                         <PostList
                             posts={posts}
                             refetchPosts={refetch}
-                            currentUser={userStored?.username || null}
+                            currentUser={user?.username || null}
                         />
                         {meta && queryParams.page! < meta.max_page && (
                             <div className="text-center p-4">
@@ -142,14 +161,6 @@ function Home() {
                     placeholder="Search"
                     className="search-input"
                 />
-                <div className="user-info">
-                    <p className="username">
-                        <strong>{userStored?.name}</strong>
-                    </p>
-                    <Button onClick={logout} variant="primary" size="sm">
-                        Logout
-                    </Button>
-                </div>
             </div>
         </section>
     );
