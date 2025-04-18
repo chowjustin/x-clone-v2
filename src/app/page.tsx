@@ -11,10 +11,10 @@ import {
     Bell,
     Bookmark,
     Briefcase,
-    Hash,
     House,
     Mail,
     MoreHorizontal,
+    Search,
     Star,
     User,
     Users
@@ -75,14 +75,17 @@ function Home() {
     };
 
     return (
-        <section className="flex bg-gray-800 relative lg:px-[10%] w-full">
+        <section className="flex bg-black relative lg:px-[10%] w-full">
             <div
                 className="bg-black text-white h-screen w-[20%] max-lg:w-[30%] fixed lg:left-[10%] lg:px-2 top-0 max-md:w-[75px] py-4 border-right-03">
                 <div className="flex flex-col justify-between h-full max-md:items-center">
                     <div>
-                        <Image src="/images/xlogo.png" alt="logo" width={300} height={300}
-                               className="max-w-[30px] mx-auto md:ml-5 mb-4"/>
-
+                        <Image
+                            src="/images/xlogo.png"
+                            alt="logo" width={300}
+                            height={300}
+                            className="max-w-[30px] mx-auto md:ml-5 mb-4"
+                        />
                         <div className="">
                             {menuItems.map((item, index) => {
                                 const Icon = item.icon;
@@ -129,7 +132,7 @@ function Home() {
                 </div>
             </div>
             <div
-                className="w-1/2 max-lg:right-0 max-lg:w-[70%] min-h-screen max-md:w-[calc(100%-75px)] max-xl:w-[60%] xl:mx-auto max-xl:right-[10%] max-xl:absolute bg-black">
+                className="w-1/2 max-lg:right-0 max-lg:w-[70%] min-h-screen max-md:w-[calc(100%-75px)] max-xl:w-[60%] xl:mx-auto max-xl:right-[10%] max-xl:absolute bg-black border-right-03">
                 <div>
                     <PostForm refetchPosts={refetch}/>
                 </div>
@@ -155,11 +158,20 @@ function Home() {
                     </>
                 )}
             </div>
-            <div className="w-[20%] bg-green-200 h-screen fixed right-[10%] top-0 max-xl:hidden">
-                <input
-                    type="text"
-                    placeholder="Search"
-                    className="search-input"
+            <div className="w-[20%] bg-black h-screen fixed right-[10%] top-0 max-xl:hidden pl-4 pt-2">
+                <div className="relative w-full mb-3">
+                    <input
+                        className="w-full px-4 py-2 pl-8 text-sm text-white placeholder-white bg-transparent border border-gray-700 rounded-full focus:outline-none focus:ring-1 focus:ring-gray-500 caret-white font-light"
+                        placeholder="Search"
+                    />
+                    <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-500"/>
+                </div>
+                <Image
+                    src="/images/right-sidebar.png"
+                    alt="logo"
+                    width={1000}
+                    height={1000}
+                    className="mx-auto"
                 />
             </div>
         </section>
@@ -168,7 +180,7 @@ function Home() {
 
 const menuItems = [
     {icon: House, title: "Home"},
-    {icon: Hash, title: "Explore"},
+    {icon: Search, title: "Explore"},
     {icon: Bell, title: "Notifications"},
     {icon: Mail, title: "Messages"},
     {icon: Bookmark, title: "Bookmarks"},

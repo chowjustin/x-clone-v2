@@ -2,6 +2,7 @@
 
 body {
     font-family: "Inter", sans-serif;
+    background: #000;
 }
 
 button {
@@ -9,25 +10,8 @@ button {
 }
 
 .border-right-03 {
-    border-right: 1px solid rgb(75, 85, 99);
+    border-right: 1px solid rgb(47, 51, 54);
     color: rgb(209, 213, 219);
-}
-
-.search-input {
-    width: 100%;
-    padding: 0.5rem;
-    border-radius: 2rem;
-    padding-left: 1rem;
-    padding-right: 1rem;
-    margin-bottom: 1.5rem;
-    color: rgb(55, 65, 81);
-    border: 1px solid rgb(55, 65, 81);
-    background-color: transparent;
-    font-size: 0.875rem;
-}
-
-.search-input::placeholder {
-    color: rgb(107, 114, 128);
 }
 
 .post-item {
@@ -35,3 +19,4 @@ button {
     border-bottom: 1px solid rgb(75, 85, 99);
     color: rgb(209, 213, 219);
 }
+
