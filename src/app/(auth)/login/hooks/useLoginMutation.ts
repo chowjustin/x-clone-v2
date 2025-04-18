@@ -32,7 +32,7 @@ export default function useLoginMutation() {
         },
         onSuccess: () => {
             toast.success("Anda berhasil login");
-            router.push("/");
+            router.push("/home");
         },
         onError: (error) => {
             toast.error(error?.response?.data.error || error.message);

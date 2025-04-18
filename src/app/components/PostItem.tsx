@@ -286,7 +286,7 @@ const PostItem: FC<PostItemProps> = ({
                             <PostForm refetchPosts={refetchPosts} parentId={post.id}/>
                         </div>
                     )}
-                    
+
                     {!isDetailView && post.replies && post.replies.length > 0 && (
                         <div className="mt-3">
                             <button

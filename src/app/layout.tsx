@@ -9,10 +9,12 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-    title: "Social Media App",
-    description: "A simple social media application built with Next.js",
+    title: {
+        default: `X`,
+        template: `%s / X`,
+    },
+    description: `From breaking news and entertainment to sports and politics, get the full story with all the live commentary.`,
 };
-
 export default function RootLayout({
                                        children,
                                    }: Readonly<{

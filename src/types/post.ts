@@ -29,9 +29,7 @@ export interface PostsQueryParams {
 }
 
 export interface PostsResponse {
-    status: boolean;
-    message: string;
-    data: any[];
+    data: Post[];
     meta: {
         page: number;
         per_page: number;

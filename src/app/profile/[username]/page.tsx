@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, {useEffect} from "react";
 import {useParams, useRouter} from "next/navigation";
 import {useQuery} from "@tanstack/react-query";
 import api, {assetBaseURL} from "@/lib/api";
@@ -33,6 +33,14 @@ const UserProfilePage = () => {
         },
         enabled: !!username,
     });
+
+    useEffect(() => {
+        if (userData?.data.username && userData?.data.name) {
+            document.title = `${userData.data.name} (@${userData.data.username}) / X`;
+        } else {
+            document.title = "Profile / X";
+        }
+    }, [userData?.data]);
 
     // Get user posts
     const {
@@ -119,7 +127,7 @@ const UserProfilePage = () => {
                         </div>
 
                         {isOwnProfile && (
-                            <Link href="/profile" className="pt-4">
+                            <Link href="/profile/edit" className="pt-4">
                                 <Button variant="secondary" size="sm">
                                     Edit profile
                                 </Button>
@@ -136,27 +144,28 @@ const UserProfilePage = () => {
                         <div className="flex flex-wrap gap-4 mt-3 text-gray-500">
                             <div className="flex items-center">
                                 <MapPin className="w-4 h-4 mr-1"/>
-                                <span>Location</span>
+                                <span>Lab RPL</span>
                             </div>
                             <div className="flex items-center">
                                 <LinkIcon className="w-4 h-4 mr-1"/>
-                                <a href="#" className="text-blue-400 hover:underline">
-                                    website.com
+                                <a href="https://github.com/Lab-RPL-ITS" target="_blank"
+                                   className="text-blue-400 hover:underline">
+                                    https://github.com/Lab-RPL-ITS
                                 </a>
                             </div>
                             <div className="flex items-center">
                                 <Calendar className="w-4 h-4 mr-1"/>
-                                <span>Joined April 2023</span>
+                                <span>Joined Jul 2023</span>
                             </div>
                         </div>
 
                         <div className="flex gap-5 mt-3">
                             <div>
-                                <span className="font-bold">123</span>{" "}
+                                <span className="font-bold">8</span>{" "}
                                 <span className="text-gray-500">Following</span>
                             </div>
                             <div>
-                                <span className="font-bold">456</span>{" "}
+                                <span className="font-bold">8M</span>{" "}
                                 <span className="text-gray-500">Followers</span>
                             </div>
                         </div>

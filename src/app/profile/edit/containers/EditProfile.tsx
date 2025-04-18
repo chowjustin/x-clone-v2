@@ -9,12 +9,11 @@ import Image from "next/image";
 import {ArrowLeft, Camera, Loader2} from "lucide-react";
 import {toast} from "react-hot-toast";
 import useAuthStore from "@/app/stores/useAuthStore";
-import Link from "next/link";
 import {useRouter} from "next/navigation";
 
-export default withAuth(ProfilePage, true);
+export default withAuth(EditProfile, true);
 
-function ProfilePage() {
+function EditProfile() {
     const {user: storeUser, setUser: setStoreUser, logout: logoutStore} = useAuthStore();
     const [name, setName] = useState<string>("");
     const [bio, setBio] = useState<string>("");
@@ -119,9 +118,12 @@ function ProfilePage() {
         <div className="bg-black min-h-screen text-white">
             <div className="max-w-2xl mx-auto px-4 py-6">
                 <div className="flex items-center mb-6">
-                    <Link href="/" className="mr-4">
+                    <button
+                        onClick={() => router.back()}
+                        className="mr-4"
+                    >
                         <ArrowLeft className="w-6 h-6"/>
-                    </Link>
+                    </button>
                     <h1 className="text-2xl font-bold">Edit Profile</h1>
                 </div>
 
