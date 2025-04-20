@@ -126,7 +126,11 @@ const PostItem: FC<PostItemProps> = ({
         }
     };
 
-    const navigateToPostDetail = () => {
+    const navigateToPostDetail = (e: React.MouseEvent) => {
+        if ((e.target as HTMLElement).closest('.post-item')?.getAttribute('draggable') === 'true') {
+            return;
+        }
+
         if (!isDetailView) {
             router.push(`/post/${post.id}`);
         }

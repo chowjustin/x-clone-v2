@@ -1,11 +1,12 @@
 "use client";
 
-import React, {useEffect, useRef, useState} from "react";
+import React, {useCallback, useEffect, useRef, useState} from "react";
 import PostForm from "@/app/components/PostForm";
 import PostList from "@/app/components/PostList";
 import withAuth from "@/components/hoc/withAuth";
 import Image from "next/image";
 import {
+    ArrowUp,
     BadgeCheck,
     Bell,
     Bookmark,
@@ -26,6 +27,8 @@ import {useQuery} from '@tanstack/react-query';
 import api, {assetBaseURL} from "@/lib/api";
 import {Post, PostsQueryParams, PostsResponse} from "@/types/post";
 import {useRouter} from "next/navigation";
+import Button from "@/components/button/Button";
+import MenuItem from "@/app/components/MenuItem";
 
 export default withAuth(Home, true)
 
@@ -36,7 +39,7 @@ function Home() {
     });
 
     const [allPosts, setAllPosts] = useState<Post[]>([]);
-    const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [showScrollButton, setShowScrollButton] = useState(false);
     const bottomRef = useRef<HTMLDivElement>(null);
 
     const {user, logout: logoutStore} = useAuthStore();
@@ -44,16 +47,24 @@ function Home() {
     const router = useRouter();
 
     useEffect(() => {
-        if (user) {
-            if (user.image_url) {
-                if (user.image_url.startsWith('http')) {
-                    setImagePreview(user.image_url);
-                } else {
-                    setImagePreview(`${assetBaseURL}/assets/${user.image_url}`);
-                }
+        const handleScroll = () => {
+            if (window.scrollY > 300) {
+                setShowScrollButton(true);
+            } else {
+                setShowScrollButton(false);
             }
-        }
-    }, [user]);
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
+    const scrollToTop = () => {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    };
 
     useEffect(() => {
         setQueryParams(prev => ({
@@ -61,6 +72,13 @@ function Home() {
             page: 1
         }));
     }, []);
+
+    const getImageUrl = (url: string | null | undefined) => {
+        if (!url) return null;
+        return url.startsWith('http') ? url : `${assetBaseURL}/assets/${url}`;
+    };
+
+    const imagePreview = getImageUrl(user?.image_url);
 
     // Get Post
     const {
@@ -98,19 +116,20 @@ function Home() {
             ...queryParams,
             page: 1
         });
-        refetch();
+        void refetch();
     };
 
-    const loadMorePosts = () => {
+    const loadMorePosts = useCallback(() => {
         if (meta && (queryParams.page ?? 1) < meta.max_page) {
             setQueryParams(prev => ({
                 ...prev,
                 page: (prev.page ?? 1) + 1
             }));
         }
-    };
+    }, [meta, queryParams.page]);
 
     useEffect(() => {
+        const currentRef = bottomRef.current;
         const observer = new IntersectionObserver(
             (entries) => {
                 if (entries[0].isIntersecting && !isLoading && meta && queryParams.page && queryParams.page < meta.max_page) {
@@ -120,16 +139,16 @@ function Home() {
             {threshold: 0.5}
         );
 
-        if (bottomRef.current) {
-            observer.observe(bottomRef.current);
+        if (currentRef) {
+            observer.observe(currentRef);
         }
 
         return () => {
-            if (bottomRef.current) {
-                observer.unobserve(bottomRef.current);
+            if (currentRef) {
+                observer.unobserve(currentRef);
             }
         };
-    }, [isLoading, meta, queryParams.page]);
+    }, [isLoading, meta, queryParams.page, loadMorePosts]);
 
     const logout = (): void => {
         logoutStore();
@@ -151,25 +170,11 @@ function Home() {
                             />
                         </Link>
                         <div className="">
-                            {menuItems.map((item, index) => {
-                                const Icon = item.icon;
-                                return (
-                                    <div
-                                        key={index}
-                                        className="flex items-center p-3 px-5 rounded-full hover:bg-gray-900 cursor-pointer w-fit transition-colors"
-                                    >
-                                        <Icon className="w-6 h-6"/>
-                                        <span className="ml-4 text-xl max-xl:text-lg max-md:hidden">{item.title}</span>
-                                    </div>
-                                );
-                            })}
-                            <div
-                                className="flex items-center p-3 px-5 rounded-full hover:bg-gray-900 cursor-pointer w-fit transition-colors"
-                                onClick={logout}
-                            >
-                                <LogOut className="w-6 h-6"/>
-                                <span className="ml-4 text-xl max-xl:text-lg max-md:hidden">Log Out</span>
-                            </div>
+                            {menuItems.map((item, index) => (
+                                <MenuItem key={index} icon={item.icon} title={item.title}/>
+                            ))}
+                            <MenuItem icon={LogOut} title="Log Out" onClick={logout}/>
+
                         </div>
                     </div>
                     <Link
@@ -248,6 +253,16 @@ function Home() {
                     className="mx-auto"
                 />
             </div>
+
+            {showScrollButton && (
+                <Button
+                    onClick={scrollToTop}
+                    className="fixed bottom-10 right-10 p-3 rounded-full transition-all duration-300 z-50"
+                    aria-label="Scroll to top"
+                >
+                    <ArrowUp className="w-5 h-5"/>
+                </Button>
+            )}
         </section>
     );
 }
